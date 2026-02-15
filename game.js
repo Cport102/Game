@@ -1,4 +1,4 @@
-﻿/*
+/*
 How to run:
 1) Keep index.html, style.css, and game.js in the same folder.
 2) Put your character sprite at assets/Andrea.png.
@@ -400,7 +400,7 @@ How to run:
     // Lock ground obstacle spawns while the bird sequence is active.
     state.birdObstacleLockTimer = Math.max(state.birdObstacleLockTimer, 1.35);
     state.spawnTimer = Math.max(nextSpawnDelay(), 1.25);
-    showMessage("Content guy incoming, double jump activated", 2.3);
+    showMessage("content guy incoming, double jump activated", 2.3);
   }
 
   function intersectsAABB(a, b, padA = 0, padB = 0) {
@@ -1097,6 +1097,33 @@ How to run:
     }
   }
 
+  function handleSpaceInput() {
+    if (!state.initialized) return;
+
+    if (state.mode === MODES.START || state.mode === MODES.GAME_OVER || state.mode === MODES.WIN) {
+      onJumpAction();
+      return;
+    }
+
+    if (state.mode === MODES.CHASE_MODE) {
+      chase.mashSpeed = Math.min(chase.maxMashSpeed, chase.mashSpeed + chase.mashBoost);
+      playBeep(640 + Math.min(250, chase.mashSpeed * 0.12), 0.025, "square", 0.015);
+      return;
+    }
+
+    if (state.mode !== MODES.RUNNING) return;
+
+    if (player.grounded) {
+      jump();
+      return;
+    }
+
+    // True consecutive double jump: second press while airborne, only while a bird is on screen.
+    if (!player.grounded && state.birds.length > 0 && doubleJump.active && !doubleJump.used) {
+      doubleJumpBoost();
+    }
+  }
+
   window.addEventListener("keydown", (e) => {
     const code = e.code;
 
@@ -1109,35 +1136,19 @@ How to run:
     if (code === "Space" || code === "ArrowUp") {
       if (!state.initialized) return;
 
-      if (state.mode === MODES.START || state.mode === MODES.GAME_OVER || state.mode === MODES.WIN) {
-        onJumpAction();
-        return;
-      }
-
-      if (state.mode === MODES.CHASE_MODE) {
-        if (code === "Space") {
-          chase.mashSpeed = Math.min(chase.maxMashSpeed, chase.mashSpeed + chase.mashBoost);
-          playBeep(640 + Math.min(250, chase.mashSpeed * 0.12), 0.025, "square", 0.015);
-        }
-        return;
-      }
-
       if (code === "Space") {
-        if (player.grounded) {
-          jump();
-          return;
-        }
-
-        // True consecutive double jump: second press while airborne, only while a bird is on screen.
-        if (!player.grounded && state.birds.length > 0 && doubleJump.active && !doubleJump.used) {
-          doubleJumpBoost();
-          return;
-        }
+        handleSpaceInput();
         return;
       }
 
       // Up Arrow keeps normal behavior (no airborne double jump).
-      jump();
+      if (state.mode === MODES.START || state.mode === MODES.GAME_OVER || state.mode === MODES.WIN) {
+        onJumpAction();
+        return;
+      }
+      if (state.mode === MODES.RUNNING) {
+        jump();
+      }
     }
 
     if (code === "ArrowDown") {
@@ -1151,15 +1162,10 @@ How to run:
     }
   });
 
-  canvas.addEventListener("pointerdown", () => {
-    if (state.mode === MODES.START || state.mode === MODES.GAME_OVER || state.mode === MODES.WIN) {
-      onJumpAction();
-      return;
-    }
-    if (state.mode === MODES.CHASE_MODE) {
-      chase.mashSpeed = Math.min(chase.maxMashSpeed, chase.mashSpeed + chase.mashBoost * 0.85);
-    }
-  });
+  canvas.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    handleSpaceInput();
+  }, { passive: false });
 
   soundBtn.addEventListener("click", () => {
     state.soundOn = !state.soundOn;

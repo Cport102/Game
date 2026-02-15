@@ -727,16 +727,7 @@ How to run:
     ctx.fillStyle = isNight ? "#121418" : "#f7f7f7";
     ctx.fillRect(0, 0, sizes.w, sizes.h);
 
-    // Distant dots/stars.
-    ctx.fillStyle = isNight ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.15)";
-    const dotCount = 26;
-    for (let i = 0; i < dotCount; i += 1) {
-      const x = (i * 173 + state.groundOffset * 0.35) % (sizes.w + 60) - 30;
-      const y = 25 + ((i * 67) % Math.max(40, sizes.groundY - 130));
-      const s = (i % 3) + 1;
-      ctx.fillRect(x, y, s, s);
-    }
-
+    
     // Clouds.
     ctx.fillStyle = isNight ? "rgba(255,255,255,0.16)" : "rgba(0,0,0,0.13)";
     for (const c of state.clouds) {

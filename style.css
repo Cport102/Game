@@ -1,0 +1,53 @@
+﻿:root {
+  --bg: #f6f7f8;
+  --fg: #1a1a1a;
+  --muted: #5c5c5c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  background: radial-gradient(circle at 20% 20%, #ffffff 0%, var(--bg) 60%, #eceef0 100%);
+  color: var(--fg);
+  overflow: hidden;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#soundToggle {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  border: 1px solid var(--fg);
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--fg);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font: 600 13px/1 "Trebuchet MS", "Segoe UI", sans-serif;
+  cursor: pointer;
+  user-select: none;
+}
+
+#soundToggle:hover {
+  background: rgba(255, 255, 255, 0.95);
+}

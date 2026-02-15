@@ -43,6 +43,7 @@ How to run:
     messageText: "",
     messageTimer: 0,
     defaultPlayerX: 0,
+    isMobile: false,
   };
 
   const sizes = {
@@ -153,6 +154,10 @@ How to run:
     return min + Math.random() * (max - min);
   }
 
+  function detectMobileLikeInput() {
+    return window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 900;
+  }
+
   function syncPlayerSize() {
     const baseH = Math.max(56, Math.min(82, Math.floor(sizes.h * 0.1)));
 
@@ -196,6 +201,7 @@ How to run:
 
     sizes.laneH = Math.max(110, Math.floor(sizes.h * 0.24));
     sizes.groundY = sizes.h - sizes.laneH;
+    state.isMobile = detectMobileLikeInput();
 
     state.defaultPlayerX = Math.max(64, Math.floor(sizes.w * 0.16));
     if (state.mode !== MODES.CHASE_MODE) {
@@ -371,15 +377,29 @@ How to run:
   function spawnBird() {
     const h = rand(30, 42);
     const w = h * rand(1.5, 1.9);
-    const startY = rand(36, Math.max(70, sizes.groundY * 0.28));
+    const diveFloor = sizes.groundY - player.h * 0.9;
+    let startY = rand(36, Math.max(70, sizes.groundY * 0.28));
+    const spawnX = sizes.w + rand(80, 200);
+    const vx = state.worldSpeed * rand(1.04, 1.18);
+    let vy = rand(120, 170);
+
+    // Mobile trajectory tweak:
+    // ensure the bird reaches its lowest point roughly in front of the player.
+    if (state.isMobile) {
+      startY = rand(20, Math.max(46, sizes.groundY * 0.2));
+      const targetX = player.x + player.w * 0.75 + rand(18, 70);
+      const timeToTarget = Math.max(0.45, Math.min(1.6, (spawnX - targetX) / vx));
+      vy = (diveFloor - startY) / timeToTarget;
+      vy = Math.max(110, Math.min(260, vy));
+    }
 
     const newBird = {
-      x: sizes.w + rand(80, 200),
+      x: spawnX,
       y: startY,
       w,
       h,
-      vx: state.worldSpeed * rand(1.04, 1.18),
-      vy: rand(120, 170),
+      vx,
+      vy,
       phase: "dive", // dive -> glide | climb
       cleared: false,
     };
@@ -727,7 +747,6 @@ How to run:
     ctx.fillStyle = isNight ? "#121418" : "#f7f7f7";
     ctx.fillRect(0, 0, sizes.w, sizes.h);
 
-    
     // Clouds.
     ctx.fillStyle = isNight ? "rgba(255,255,255,0.16)" : "rgba(0,0,0,0.13)";
     for (const c of state.clouds) {

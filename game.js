@@ -400,7 +400,7 @@ How to run:
     // Lock ground obstacle spawns while the bird sequence is active.
     state.birdObstacleLockTimer = Math.max(state.birdObstacleLockTimer, 1.35);
     state.spawnTimer = Math.max(nextSpawnDelay(), 1.25);
-    showMessage("double tap to double jump", 2.3);
+    showMessage("Content guy incoming, double jump activated", 2.3);
   }
 
   function intersectsAABB(a, b, padA = 0, padB = 0) {
